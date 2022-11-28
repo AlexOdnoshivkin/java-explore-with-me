@@ -57,7 +57,6 @@ public interface EventMapper {
         eventShortDto.setInitiator(UserMapper.mapToUserShortDtoFromUser(event.getInitiator()));
         eventShortDto.setPaid(event.isPaid());
         eventShortDto.setTitle(event.getTitle());
-        eventShortDto.setViews(event.getViews());
         return eventShortDto;
     }
 
@@ -78,7 +77,6 @@ public interface EventMapper {
         eventFullDto.setRequestModeration(event.isRequestModeration());
         eventFullDto.setState(event.getState());
         eventFullDto.setTitle(event.getTitle());
-        eventFullDto.setViews(event.getViews());
         return eventFullDto;
     }
 

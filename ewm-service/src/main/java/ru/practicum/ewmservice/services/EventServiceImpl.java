@@ -184,6 +184,18 @@ public class EventServiceImpl implements EventService {
                 .map(mapper::toEventShortDtoFromEvent)
                 .collect(Collectors.toList());
 
+        String[] uris = result.stream().map((EventShortDto e) -> ("/event/" + e.getId())).toArray(String[]::new);
+
+        Map<String, ViewStats> viewStatsMap = httpClient.getStat(LocalDateTime.now().minusYears(100),
+                LocalDateTime.now().plusYears(100), uris, true);
+        if (viewStatsMap != null) {
+            result = result.stream()
+                    .peek((e -> {
+                        if (viewStatsMap.get("/event/" + e.getId()) != null) {
+                            e.setViews(Math.toIntExact(viewStatsMap.get("/event/" + e.getId()).getHits()));
+                        }
+                    })).collect(Collectors.toList());
+        }
         log.info("Найден список событий в базе данных: {}", result);
         httpClient.postStat(null, uri, ip);
         return result;
@@ -193,14 +205,14 @@ public class EventServiceImpl implements EventService {
     public EventFullDto getEventFullInfoById(Long eventId, String ip, String uri) {
         Event event = checkEventInDatabase(eventId);
         httpClient.postStat(event.getId(), uri, ip);
+        eventRepository.save(event);
+        EventFullDto result = mapper.toEventFullDtoFromEvent(event);
         Map<String, ViewStats> viewStatsMap = httpClient.getStat(LocalDateTime.now().minusYears(100),
                 LocalDateTime.now().plusYears(100), new String[]{uri}, true);
         if (viewStatsMap != null) {
             Long views = viewStatsMap.get(uri).getHits();
-            event.setViews(Math.toIntExact(views));
+            result.setViews(Math.toIntExact(views));
         }
-        eventRepository.save(event);
-        EventFullDto result = mapper.toEventFullDtoFromEvent(event);
         log.debug("Получено событие из базы данных: {}", result);
         return result;
     }
@@ -249,10 +261,21 @@ public class EventServiceImpl implements EventService {
         Iterable<Event> foundEvents = eventRepository.findAll(byCategories.and(byUserId).and(byStates)
                 .and(byEventDate), pageable);
 
-
         List<EventFullDto> result = StreamSupport.stream(foundEvents.spliterator(), false)
                 .map(mapper::toEventFullDtoFromEvent)
                 .collect(Collectors.toList());
+        String[] uris = result.stream().map((EventFullDto e) -> ("/event/" + e.getId())).toArray(String[]::new);
+
+        Map<String, ViewStats> viewStatsMap = httpClient.getStat(LocalDateTime.now().minusYears(100),
+                LocalDateTime.now().plusYears(100), uris, true);
+        if (viewStatsMap != null) {
+            result = result.stream()
+                    .peek((e -> {
+                        if (viewStatsMap.get("/event/" + e.getId()) != null) {
+                            e.setViews(Math.toIntExact(viewStatsMap.get("/event/" + e.getId()).getHits()));
+                        }
+                    })).collect(Collectors.toList());
+        }
 
         log.debug("Найден список событий в базе данных: {}", result);
         return result;

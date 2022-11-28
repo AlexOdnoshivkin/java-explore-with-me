@@ -6,6 +6,7 @@ import ru.practicum.ewmservice.models.location.Location;
 import ru.practicum.ewmservice.validation.AfterTime;
 
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.PositiveOrZero;
 import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
 
@@ -26,6 +27,7 @@ public class NewEventDto {
     @NotNull
     private Location location;
     private boolean paid;
+    @PositiveOrZero
     private int participantLimit;
     private boolean requestModeration;
     @NotNull

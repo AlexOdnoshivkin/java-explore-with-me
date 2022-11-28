@@ -17,13 +17,13 @@ public class ParticipationRequest {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(name = "created")
+    @Column(name = "created", nullable = false)
     private LocalDateTime created;
-    @Column(name = "event")
+    @Column(name = "event", nullable = false)
     private Long event;
-    @Column(name = "requester")
+    @Column(name = "requester", nullable = false)
     private Long requester;
-    @Column(name = "status")
+    @Column(name = "status", nullable = false)
     private Status status;
 
 }

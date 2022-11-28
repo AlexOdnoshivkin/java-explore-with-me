@@ -12,23 +12,31 @@ import java.time.LocalDateTime;
 
 @Data
 public class EventFullDto {
+    @NotNull
     private String annotation;
-    private CategoryDto category;
     private int confirmedRequests;
     private LocalDateTime createdOn;
     private String description;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", shape = JsonFormat.Shape.STRING)
+    @NotNull
     private LocalDateTime eventDate;
     @NotNull
     private Long id;
-    private UserShortDto initiator;
-    private Location location;
+    @NotNull
     private boolean paid;
     private int participantLimit;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", shape = JsonFormat.Shape.STRING)
     private LocalDateTime publishedOn;
     private boolean requestModeration;
+    @NotNull
     private State state;
+    @NotNull
     private String title;
     private int views;
+    private Location location;
+    @NotNull
+    private CategoryDto category;
+    @NotNull
+    private UserShortDto initiator;
+
 }
