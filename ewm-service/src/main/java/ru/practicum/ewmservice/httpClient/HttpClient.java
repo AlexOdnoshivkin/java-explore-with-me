@@ -25,8 +25,8 @@ public class HttpClient {
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     public void postStat(Long id, String uri, String ip) {
-        String timestamp = LocalDateTime.now().format(FORMATTER);
 
+        String timestamp = LocalDateTime.now().format(FORMATTER);
         EndpointHit endpointHit = new EndpointHit();
         HttpEntity<EndpointHit> request = new HttpEntity<>(endpointHit);
         endpointHit.setIp(ip);
@@ -34,12 +34,17 @@ public class HttpClient {
         endpointHit.setApp("java-explore-with-me");
         endpointHit.setId(id);
         endpointHit.setTimesTamp(timestamp);
-        ResponseEntity<EndpointHit> response = restTemplate.exchange(STAT_SERVICE_URL + "/hit",
-                HttpMethod.POST, request, EndpointHit.class);
-        String status = response.getStatusCode().toString();
-        log.info("Отправлен HTTP-запрос с параметрами: url: {}, Method: {}, request: {}",
-                STAT_SERVICE_URL + "/hit", HttpMethod.POST, request);
-        log.info("Получен ответ: status: {}", status);
+        try {
+            ResponseEntity<EndpointHit> response = restTemplate.exchange(STAT_SERVICE_URL + "/hit",
+                    HttpMethod.POST, request, EndpointHit.class);
+            String status = response.getStatusCode().toString();
+            log.info("Отправлен HTTP-запрос с параметрами: url: {}, Method: {}, request: {}",
+                    STAT_SERVICE_URL + "/hit", HttpMethod.POST, request);
+            log.info("Получен ответ: status: {}", status);
+        } catch (Exception e) {
+            log.info("{}", e.getMessage());
+        }
+
     }
 
     @RequestMapping(value = STAT_SERVICE_URL + "/stats", method = RequestMethod.GET)
@@ -74,16 +79,21 @@ public class HttpClient {
         HttpHeaders headers = new HttpHeaders();
         headers.setAccept(List.of(MediaType.APPLICATION_JSON));
         HttpEntity<ViewStats> viewStatsHttpEntity = new HttpEntity<>(headers);
-        ResponseEntity<ViewStats[]> response = restTemplate.exchange(
-                urlTemplate, HttpMethod.GET, viewStatsHttpEntity, ViewStats[].class, parameters);
-        log.info("Отправлен http-запрос с параметрами: url: {}, method: {}", urlTemplate, HttpMethod.GET);
-        log.info("Получен ответ: status: {}, body: {}", response.getStatusCode(), response.getBody());
+        try {
+            ResponseEntity<ViewStats[]> response = restTemplate.exchange(
+                    urlTemplate, HttpMethod.GET, viewStatsHttpEntity, ViewStats[].class, parameters);
+            log.info("Отправлен http-запрос с параметрами: url: {}, method: {}", urlTemplate, HttpMethod.GET);
+            log.info("Получен ответ: status: {}, body: {}", response.getStatusCode(), response.getBody());
 
-        Map<String, ViewStats> result = new HashMap<>();
-        List<ViewStats> viewStatsList = List.of(Objects.requireNonNull(response.getBody()));
-        for (ViewStats viewStats : viewStatsList) {
-            result.put(viewStats.getUri(), viewStats);
+            Map<String, ViewStats> result = new HashMap<>();
+            List<ViewStats> viewStatsList = List.of(Objects.requireNonNull(response.getBody()));
+            for (ViewStats viewStats : viewStatsList) {
+                result.put(viewStats.getUri(), viewStats);
+            }
+            return result;
+        } catch (Exception e) {
+            log.info("{}", e.getMessage());
+            return null;
         }
-        return result;
     }
 }

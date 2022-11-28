@@ -195,8 +195,10 @@ public class EventServiceImpl implements EventService {
         httpClient.postStat(event.getId(), uri, ip);
         Map<String, ViewStats> viewStatsMap = httpClient.getStat(LocalDateTime.now().minusYears(100),
                 LocalDateTime.now().plusYears(100), new String[]{uri}, true);
-        Long views = viewStatsMap.get(uri).getHits();
-        event.setViews(Math.toIntExact(views));
+        if (viewStatsMap != null) {
+            Long views = viewStatsMap.get(uri).getHits();
+            event.setViews(Math.toIntExact(views));
+        }
         eventRepository.save(event);
         EventFullDto result = mapper.toEventFullDtoFromEvent(event);
         log.debug("Получено событие из базы данных: {}", result);
