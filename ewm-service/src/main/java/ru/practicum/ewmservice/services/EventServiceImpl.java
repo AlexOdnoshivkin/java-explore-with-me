@@ -1,5 +1,6 @@
 package ru.practicum.ewmservice.services;
 
+import com.querydsl.core.types.dsl.BooleanExpression;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
@@ -9,11 +10,12 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.ewmservice.FromSizeRequest;
 import ru.practicum.ewmservice.exceptions.EntityNotFoundException;
 import ru.practicum.ewmservice.httpClient.HttpClient;
-import ru.practicum.ewmservice.models.httpClientRequestEntity.ViewStats;
 import ru.practicum.ewmservice.models.category.Category;
 import ru.practicum.ewmservice.models.event.Event;
+import ru.practicum.ewmservice.models.event.QEvent;
 import ru.practicum.ewmservice.models.event.State;
 import ru.practicum.ewmservice.models.event.dto.*;
+import ru.practicum.ewmservice.models.httpClientRequestEntity.ViewStats;
 import ru.practicum.ewmservice.models.user.User;
 import ru.practicum.ewmservice.repositories.CategoryRepository;
 import ru.practicum.ewmservice.repositories.EventRepository;
@@ -24,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @Service
 @Slf4j
@@ -136,7 +139,6 @@ public class EventServiceImpl implements EventService {
     public List<EventShortDto> searchEvents(String text, Long[] categories, Boolean paid, LocalDateTime rangeStart,
                                             LocalDateTime rangeEnd, boolean isAvailable, String sort, int from,
                                             int size, String ip, String uri) {
-        List<EventShortDto> result;
         if (rangeStart == null) {
             rangeStart = LocalDateTime.now();
         }
@@ -145,17 +147,43 @@ public class EventServiceImpl implements EventService {
         }
         Pageable pageable = setPageable(from, size, sort);
 
-        if (paid == null) {
-            result = eventRepository.searchEventsWithoutPaid(text, categories, rangeStart, rangeEnd,
-                            isAvailable, pageable).stream()
-                    .map(mapper::toEventShortDtoFromEvent)
-                    .collect(Collectors.toList());
+        BooleanExpression byAnnotation;
+        BooleanExpression byDescription;
+        BooleanExpression byPaid;
+        BooleanExpression byAvailable;
+        BooleanExpression byCategories;
+        BooleanExpression byEventDate = QEvent.event.eventDate.between(rangeStart, rangeEnd);
+
+        if (text == null) {
+            byAnnotation = QEvent.event.annotation.ne("");
+            byDescription = QEvent.event.description.ne("");
         } else {
-            result = eventRepository.searchEventsWithPaid(text, categories, paid, rangeStart, rangeEnd,
-                            isAvailable, pageable).stream()
-                    .map(mapper::toEventShortDtoFromEvent)
-                    .collect(Collectors.toList());
+            byAnnotation = QEvent.event.annotation.containsIgnoreCase(text);
+            byDescription = QEvent.event.description.containsIgnoreCase(text);
         }
+        if (categories == null) {
+            byCategories = QEvent.event.category.id.ne(0L);
+        } else {
+            byCategories = QEvent.event.category.id.in(categories);
+        }
+        if (paid == null) {
+            byPaid = QEvent.event.paid.isTrue().or(QEvent.event.paid.isFalse());
+        } else {
+            byPaid = QEvent.event.paid.eq(paid);
+        }
+        if (isAvailable) {
+            byAvailable = QEvent.event.confirmedRequests.lt(QEvent.event.participantLimit);
+        } else {
+            byAvailable = QEvent.event.id.ne(0L);
+        }
+
+
+        Iterable<Event> foundEvents = eventRepository.findAll(byAnnotation.or(byDescription).and(byCategories)
+                .and(byPaid).and(byAvailable).and(byEventDate), pageable);
+        List<EventShortDto> result = StreamSupport.stream(foundEvents.spliterator(), false)
+                .map(mapper::toEventShortDtoFromEvent)
+                .collect(Collectors.toList());
+
         log.info("Найден список событий в базе данных: {}", result);
         httpClient.postStat(null, uri, ip);
         return result;
@@ -166,7 +194,7 @@ public class EventServiceImpl implements EventService {
         Event event = checkEventInDatabase(eventId);
         httpClient.postStat(event.getId(), uri, ip);
         Map<String, ViewStats> viewStatsMap = httpClient.getStat(LocalDateTime.now().minusYears(100),
-                LocalDateTime.now().plusYears(100), new String[]{uri, uri}, true);
+                LocalDateTime.now().plusYears(100), new String[]{uri}, true);
         Long views = viewStatsMap.get(uri).getHits();
         event.setViews(Math.toIntExact(views));
         eventRepository.save(event);
@@ -190,11 +218,40 @@ public class EventServiceImpl implements EventService {
                                                  LocalDateTime rangeStart, LocalDateTime rangeEnd, int from, int size) {
         Pageable pageable = setPageable(from, size, null);
 
-        List<EventFullDto> result = eventRepository
-                .searchEventsWithUsersAndCategoryAndStates(users, states, categories, rangeStart, rangeEnd, pageable)
-                .stream()
+        BooleanExpression byUserId;
+        BooleanExpression byStates;
+        BooleanExpression byCategories;
+        BooleanExpression byEventDate;
+
+        if (users != null) {
+            byUserId = QEvent.event.initiator.id.in(users);
+        } else {
+            byUserId = QEvent.event.initiator.id.ne(0L);
+        }
+        if (states != null) {
+            byStates = QEvent.event.state.in(states);
+        } else {
+            byStates = QEvent.event.state.isNotNull();
+        }
+        if (categories != null) {
+            byCategories = QEvent.event.category.id.in(categories);
+        } else {
+            byCategories = QEvent.event.category.id.ne(0L);
+        }
+        if (rangeEnd == null && rangeStart == null) {
+            byEventDate = QEvent.event.eventDate.after(LocalDateTime.now().minusYears(100));
+        } else {
+            byEventDate = QEvent.event.eventDate.between(rangeStart, rangeEnd);
+        }
+
+        Iterable<Event> foundEvents = eventRepository.findAll(byCategories.and(byUserId).and(byStates)
+                .and(byEventDate), pageable);
+
+
+        List<EventFullDto> result = StreamSupport.stream(foundEvents.spliterator(), false)
                 .map(mapper::toEventFullDtoFromEvent)
                 .collect(Collectors.toList());
+
         log.debug("Найден список событий в базе данных: {}", result);
         return result;
     }
