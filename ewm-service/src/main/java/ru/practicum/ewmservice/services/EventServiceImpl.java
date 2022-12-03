@@ -61,7 +61,8 @@ public class EventServiceImpl implements EventService {
         if (locationDto.getId() == null) {
             // Проверяем, если локация не берётся из таблицы, проверяем по координатам наличие в бд локации.
             // Если находим - записываем её в событие. Иначе создаём новую запись
-            Optional<Location> locationOptional = locationService.setLocationIfExist(locationDto.getLat(), locationDto.getLon());
+            Optional<Location> locationOptional = locationService.getLocationByCoordinate(locationDto.getLat(),
+                    locationDto.getLon());
             if (locationOptional.isPresent()) {
                 newEventDto.setLocation(LocationMapper.toLocationDtoFromLocation(locationOptional.get()));
             } else {
@@ -202,7 +203,6 @@ public class EventServiceImpl implements EventService {
         Iterable<Event> foundEvents = eventRepository.findAll(byAnnotation.or(byDescription).and(byCategories)
                 .and(byPaid).and(byAvailable).and(byEventDate), pageable);
 
-        System.out.println(foundEvents);
         // Отбираем события по локации
         if (lat != null && lon != null) {
             foundEvents = StreamSupport.stream(foundEvents.spliterator(), false)

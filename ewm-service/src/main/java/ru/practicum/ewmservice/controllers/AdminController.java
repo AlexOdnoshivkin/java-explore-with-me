@@ -89,8 +89,8 @@ public class AdminController {
                                            @PositiveOrZero @RequestParam(name = "from", defaultValue = "0")
                                            int from,
                                            @Positive @RequestParam(name = "size", defaultValue = "10") int size,
-                                           @RequestParam(name = "lat", required = false) Double lat,
-                                           @RequestParam(name = "lon", required = false) Double lon
+                                           @PositiveOrZero @RequestParam (name = "lat", required = false) Double lat,
+                                           @PositiveOrZero @RequestParam(name = "lon", required = false) Double lon
     ) {
         log.info("Получен запрос на поиск события с параметрами: users: {}, states: {}, categories: {}, " +
                         "rangeStart: {}, rangeEnd: {}, from: {}, size: {}", users, states, categories, rangeStart,

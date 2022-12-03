@@ -61,8 +61,8 @@ public class PublicController {
                                             Integer from,
                                             @Positive @RequestParam(name = "size", defaultValue = "10") Integer size,
                                             HttpServletRequest request,
-                                            @RequestParam(name = "lat", required = false) Double lat,
-                                            @RequestParam(name = "lon", required = false) Double lon) {
+                                            @PositiveOrZero @RequestParam(name = "lat", required = false) Double lat,
+                                            @PositiveOrZero @RequestParam(name = "lon", required = false) Double lon) {
         String ip = request.getRemoteAddr();
         String uri = request.getRequestURI();
         log.info("client ip: {}", ip);

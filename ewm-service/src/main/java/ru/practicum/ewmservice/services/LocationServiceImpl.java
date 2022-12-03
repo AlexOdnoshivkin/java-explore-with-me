@@ -50,7 +50,7 @@ public class LocationServiceImpl implements LocationService {
         log.debug("Локация с id " + id + " удалена из базы данных");
     }
 
-    public Optional<Location> setLocationIfExist(double lat, double lon) {
+    public Optional<Location> getLocationByCoordinate(double lat, double lon) {
         return locationRepository
                 .findLocationByCoordinate(lat, lon);
     }
