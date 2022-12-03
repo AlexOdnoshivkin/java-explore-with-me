@@ -2,6 +2,7 @@ package ru.practicum.ewmservice.httpClient;
 
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -17,12 +18,16 @@ import java.util.*;
 
 @RestController
 @Slf4j
-public class HttpClient {
-    RestTemplate restTemplate = new RestTemplate();
 
-    private static final String STAT_SERVICE_URL = "http://localhost:9090";
+public class HttpClient {
+    private final RestTemplate restTemplate = new RestTemplate();
+    private final String statServiceUrl;
 
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+    HttpClient(@Value("${stat-server.url}") String statServiceUrl) {
+        this.statServiceUrl = statServiceUrl;
+    }
 
     public void postStat(Long id, String uri, String ip) {
 
@@ -35,11 +40,11 @@ public class HttpClient {
         endpointHit.setId(id);
         endpointHit.setTimesTamp(timestamp);
         try {
-            ResponseEntity<EndpointHit> response = restTemplate.exchange(STAT_SERVICE_URL + "/hit",
+            ResponseEntity<EndpointHit> response = restTemplate.exchange(statServiceUrl + "/hit",
                     HttpMethod.POST, request, EndpointHit.class);
             String status = response.getStatusCode().toString();
             log.info("Отправлен HTTP-запрос с параметрами: url: {}, Method: {}, request: {}",
-                    STAT_SERVICE_URL + "/hit", HttpMethod.POST, request);
+                    statServiceUrl + "/hit", HttpMethod.POST, request);
             log.info("Получен ответ: status: {}", status);
         } catch (Exception e) {
             log.info("{}", e.getMessage());
@@ -47,9 +52,9 @@ public class HttpClient {
 
     }
 
-    @RequestMapping(value = STAT_SERVICE_URL + "/stats", method = RequestMethod.GET)
+    @RequestMapping(method = RequestMethod.GET)
     public Map<String, ViewStats> getStat(LocalDateTime start, LocalDateTime end, String[] uris, boolean unique) {
-        String url = STAT_SERVICE_URL + "/stats";
+        String url = statServiceUrl + "/stats";
         String startString = start.format(FORMATTER);
         String endString = end.format(FORMATTER);
         String urlTemplate;

@@ -3,6 +3,7 @@ package ru.practicum.ewmservice.models.event;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 import ru.practicum.ewmservice.models.category.Category;
+import ru.practicum.ewmservice.models.location.Location;
 import ru.practicum.ewmservice.models.user.User;
 
 import javax.persistence.*;
@@ -38,10 +39,9 @@ public class Event {
     @ManyToOne
     @JoinColumn(name = "initiator_id", nullable = false)
     private User initiator;
-    @Column(name = "location_lat", nullable = false)
-    private double locationLat;
-    @Column(name = "location_lon", nullable = false)
-    private double locationLon;
+    @ManyToOne
+    @JoinColumn(name = "location_id")
+    private Location location;
     @Column(name = "paid", nullable = false)
     private boolean paid;
     @Column(name = "participant_limit")

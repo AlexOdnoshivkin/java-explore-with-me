@@ -12,12 +12,10 @@ import ru.practicum.ewmservice.models.compilation.dto.NewCompilationDto;
 import ru.practicum.ewmservice.models.event.State;
 import ru.practicum.ewmservice.models.event.dto.AdminUpdateEventRequest;
 import ru.practicum.ewmservice.models.event.dto.EventFullDto;
+import ru.practicum.ewmservice.models.location.dto.LocationDto;
 import ru.practicum.ewmservice.models.user.dto.NewUserRequest;
 import ru.practicum.ewmservice.models.user.dto.UserDto;
-import ru.practicum.ewmservice.services.CategoryService;
-import ru.practicum.ewmservice.services.CompilationService;
-import ru.practicum.ewmservice.services.EventService;
-import ru.practicum.ewmservice.services.UserService;
+import ru.practicum.ewmservice.services.*;
 
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
@@ -37,6 +35,8 @@ public class AdminController {
     private final CompilationService compilationService;
 
     private final EventService eventService;
+
+    private final LocationService locationService;
 
     @PostMapping("/users")
     public UserDto addNewUser(@RequestBody @Validated NewUserRequest newUser) {
@@ -88,12 +88,14 @@ public class AdminController {
                                                    (pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeEnd,
                                            @PositiveOrZero @RequestParam(name = "from", defaultValue = "0")
                                            int from,
-                                           @Positive @RequestParam(name = "size", defaultValue = "10") int size
+                                           @Positive @RequestParam(name = "size", defaultValue = "10") int size,
+                                           @RequestParam(name = "lat", required = false) Double lat,
+                                           @RequestParam(name = "lon", required = false) Double lon
     ) {
         log.info("Получен запрос на поиск события с параметрами: users: {}, states: {}, categories: {}, " +
                         "rangeStart: {}, rangeEnd: {}, from: {}, size: {}", users, states, categories, rangeStart,
                 rangeEnd, from, size);
-        return eventService.searchEventByAdmin(users, states, categories, rangeStart, rangeEnd, from, size);
+        return eventService.searchEventByAdmin(users, states, categories, rangeStart, rangeEnd, from, size, lat, lon);
     }
 
     @PatchMapping("events/{eventId}/publish")
@@ -151,6 +153,18 @@ public class AdminController {
     public void deleteCompilationFromMainPage(@PathVariable(name = "compId") Long compilationId) {
         log.info("Получен запрос на удаление подборки с id {} c главной страницы", compilationId);
         compilationService.deleteCompilationFromMainPage(compilationId);
+    }
+
+    @PostMapping("/locations")
+    public LocationDto addLocation(@RequestBody LocationDto location) {
+        log.info("Получен запрос на добавление локации: {}", location);
+        return locationService.addLocation(location);
+    }
+
+    @DeleteMapping("/locations/{locId}")
+    public void deleteLocationById(@PathVariable (name = "locId") Long locationId) {
+        log.info("Получен запрос на удаление локации с id: {}", locationId);
+        locationService.deleteLocationById(locationId);
     }
 
 }
