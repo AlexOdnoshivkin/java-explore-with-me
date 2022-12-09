@@ -3,7 +3,6 @@ package ru.practicum.ewmservice.models.location;
 import lombok.*;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "locations")
@@ -19,8 +18,6 @@ public class Location {
     private Long id;
     private String name;
     private Double radius;
-    @NotNull
     private Double lat;
-    @NotNull
     private Double lon;
 }

@@ -5,7 +5,6 @@ import lombok.Data;
 import ru.practicum.ewmservice.models.location.dto.LocationDto;
 import ru.practicum.ewmservice.validation.AfterTime;
 
-import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.PositiveOrZero;
 import javax.validation.constraints.Size;
@@ -26,7 +25,6 @@ public class NewEventDto {
     @NotNull
     private LocalDateTime eventDate;
     @NotNull
-    @Valid
     private LocationDto location;
     private boolean paid;
     @PositiveOrZero
