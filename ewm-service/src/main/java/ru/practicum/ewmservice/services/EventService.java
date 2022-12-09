@@ -23,13 +23,15 @@ public interface EventService {
 
     List<EventShortDto> searchEvents(String text, Long[] categories, Boolean paid, LocalDateTime rangeStart,
                                      LocalDateTime rangeEnd, boolean isAvailable, String sort, int from,
-                                     int size, String ip, String uri);
+                                     int size, String ip, String uri, Double lat, Double lon);
 
     EventFullDto getEventFullInfoById(Long eventId, String ip, String uri);
 
     EventFullDto putEventByAdmin(Long eventId, AdminUpdateEventRequest adminUpdateEventRequest);
 
-    List<EventFullDto> searchEventByAdmin(Long[] users, State[] states, Long[] categories,
-                                          LocalDateTime rangeStart, LocalDateTime rangeEnd, int from, int size);
+    List<EventFullDto> searchEventByAdmin(Long[] users, State[] states, Long[] categories, LocalDateTime rangeStart,
+                                          LocalDateTime rangeEnd, int from, int size, Double lat, Double lon);
+
+    List<EventShortDto> searchEventInLocation(double lat, double lon);
 
 }

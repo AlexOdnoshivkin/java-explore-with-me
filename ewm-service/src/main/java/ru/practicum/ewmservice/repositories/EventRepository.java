@@ -15,4 +15,12 @@ public interface EventRepository extends JpaRepository<Event, Long>, QuerydslPre
 
     @Query("select e from Event as e where e.category.id = ?1 order by e.id")
     List<Event> getEventsByCategory(Long categoryId);
+
+
+    @Query(value = "SELECT * " +
+            "FROM events as e " +
+            "INNER JOIN locations as l on e.location_id = l.id " +
+            "where distance(l.lat, l.lon, ?1, ?2) <= l.radius",
+    nativeQuery = true)
+    List<Event> getEventsByLocation(double lat, double lon);
 }

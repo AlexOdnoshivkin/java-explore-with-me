@@ -12,6 +12,7 @@ import ru.practicum.ewmservice.models.participation_request.dto.ParticipationReq
 import ru.practicum.ewmservice.services.EventService;
 import ru.practicum.ewmservice.services.ParticipationRequestService;
 
+import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
@@ -19,6 +20,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @Slf4j
+@Validated
 public class PrivateController {
 
     private final EventService eventService;
@@ -27,7 +29,7 @@ public class PrivateController {
 
     @PostMapping("/users/{userId}/events")
     public EventFullDto addNewEvent(@PathVariable(name = "userId") Long userId,
-                                    @RequestBody @Validated NewEventDto newEventDto) {
+                                    @RequestBody @Valid NewEventDto newEventDto) {
         log.info("Получен запрос на добавление события {} пользователем с id {}", newEventDto, userId);
         return eventService.addNewEvent(newEventDto, userId);
     }

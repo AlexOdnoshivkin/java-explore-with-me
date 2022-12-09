@@ -3,7 +3,7 @@ package ru.practicum.ewmservice.models.event.dto;
 import org.mapstruct.*;
 import ru.practicum.ewmservice.models.category.dto.CategoryMapper;
 import ru.practicum.ewmservice.models.event.Event;
-import ru.practicum.ewmservice.models.location.Location;
+import ru.practicum.ewmservice.models.location.dto.LocationMapper;
 import ru.practicum.ewmservice.models.user.dto.UserMapper;
 
 @Mapper(componentModel = "spring")
@@ -25,8 +25,7 @@ public interface EventMapper {
             @Mapping(source = "category", target = "category.id"),
             @Mapping(source = "description", target = "description"),
             @Mapping(source = "eventDate", target = "eventDate"),
-            @Mapping(source = "location.lon", target = "locationLon"),
-            @Mapping(source = "location.lat", target = "locationLat"),
+            @Mapping(source = "location", target = "location"),
             @Mapping(source = "paid", target = "paid"),
             @Mapping(source = "participantLimit", target = "participantLimit"),
             @Mapping(source = "requestModeration", target = "requestModeration"),
@@ -38,8 +37,7 @@ public interface EventMapper {
             @Mapping(source = "category", target = "category.id"),
             @Mapping(source = "description", target = "description"),
             @Mapping(source = "eventDate", target = "eventDate"),
-            @Mapping(source = "location.lon", target = "locationLon"),
-            @Mapping(source = "location.lat", target = "locationLat"),
+            @Mapping(source = "location", target = "location"),
             @Mapping(source = "paid", target = "paid"),
             @Mapping(source = "participantLimit", target = "participantLimit"),
             @Mapping(source = "requestModeration", target = "requestModeration"),
@@ -70,7 +68,7 @@ public interface EventMapper {
         eventFullDto.setEventDate(event.getEventDate());
         eventFullDto.setId(event.getId());
         eventFullDto.setInitiator(UserMapper.mapToUserShortDtoFromUser(event.getInitiator()));
-        eventFullDto.setLocation(new Location(event.getLocationLat(), event.getLocationLon()));
+        eventFullDto.setLocation(LocationMapper.toLocationDtoFromLocation(event.getLocation()));
         eventFullDto.setPaid(event.isPaid());
         eventFullDto.setParticipantLimit(event.getParticipantLimit());
         eventFullDto.setPublishedOn(event.getPublishedOn());
