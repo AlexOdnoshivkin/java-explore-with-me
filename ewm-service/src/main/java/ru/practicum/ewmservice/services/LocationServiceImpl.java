@@ -7,9 +7,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.ewmservice.FromSizeRequest;
 import ru.practicum.ewmservice.exceptions.EntityNotFoundException;
+import ru.practicum.ewmservice.models.event.Event;
 import ru.practicum.ewmservice.models.location.Location;
 import ru.practicum.ewmservice.models.location.dto.LocationDto;
 import ru.practicum.ewmservice.models.location.dto.LocationMapper;
+import ru.practicum.ewmservice.repositories.EventRepository;
 import ru.practicum.ewmservice.repositories.LocationRepository;
 
 import java.util.List;
@@ -22,6 +24,8 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 public class LocationServiceImpl implements LocationService {
     private final LocationRepository locationRepository;
+
+    private final EventRepository eventRepository;
 
     @Override
     @Transactional
@@ -45,7 +49,11 @@ public class LocationServiceImpl implements LocationService {
     @Override
     @Transactional
     public void deleteLocationById(Long id) {
-        checkLocation(id);
+        Location location = checkLocation(id);
+        List<Event> events =  eventRepository.getEventsByLocation(location.getLat(), location.getLon());
+        if (events.size() != 0) {
+            throw new IllegalStateException("Локация не может быть удалена, пока к ней привязаны события");
+        }
         locationRepository.deleteById(id);
         log.debug("Локация с id " + id + " удалена из базы данных");
     }

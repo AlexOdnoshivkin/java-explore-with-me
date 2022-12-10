@@ -156,7 +156,7 @@ public class AdminController {
     }
 
     @PostMapping("/locations")
-    public LocationDto addLocation(@RequestBody LocationDto location) {
+    public LocationDto addLocation(@RequestBody @Validated LocationDto location) {
         log.info("Получен запрос на добавление локации: {}", location);
         return locationService.addLocation(location);
     }
