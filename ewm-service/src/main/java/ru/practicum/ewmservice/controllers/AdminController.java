@@ -17,6 +17,7 @@ import ru.practicum.ewmservice.models.user.dto.NewUserRequest;
 import ru.practicum.ewmservice.models.user.dto.UserDto;
 import ru.practicum.ewmservice.services.*;
 
+import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 import java.time.LocalDateTime;
@@ -26,6 +27,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 @RequestMapping(path = "/admin")
+@Validated
 public class AdminController {
 
     private final UserService userService;
@@ -156,7 +158,7 @@ public class AdminController {
     }
 
     @PostMapping("/locations")
-    public LocationDto addLocation(@RequestBody @Validated LocationDto location) {
+    public LocationDto addLocation(@RequestBody @Valid LocationDto location) {
         log.info("Получен запрос на добавление локации: {}", location);
         return locationService.addLocation(location);
     }

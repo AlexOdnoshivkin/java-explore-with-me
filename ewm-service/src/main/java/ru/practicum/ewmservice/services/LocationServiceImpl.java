@@ -51,6 +51,7 @@ public class LocationServiceImpl implements LocationService {
     public void deleteLocationById(Long id) {
         Location location = checkLocation(id);
         List<Event> events =  eventRepository.getEventsByLocation(location.getLat(), location.getLon());
+        log.debug("Найденные события в локации: {}", events);
         if (events.size() != 0) {
             throw new IllegalStateException("Локация не может быть удалена, пока к ней привязаны события");
         }
