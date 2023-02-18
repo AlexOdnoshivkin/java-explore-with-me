@@ -114,7 +114,7 @@ public class AdminController {
 
     @PutMapping("events/{eventId}")
     public EventFullDto editingEventByAdmin(@PathVariable(name = "eventId") Long eventId,
-                                            @RequestBody AdminUpdateEventRequest eventToUpdate) {
+                                            @RequestBody @Validated AdminUpdateEventRequest eventToUpdate) {
         log.info("Получен запрос на редактирование события с id {} администратором: {}", eventId, eventToUpdate);
         return eventService.putEventByAdmin(eventId, eventToUpdate);
     }
@@ -151,7 +151,7 @@ public class AdminController {
         compilationService.deleteEventFromCompilation(compilationId, eventId);
     }
 
-    @DeleteMapping("/compilations/{compId}/pin")
+    @DeleteMapping(" ")
     public void deleteCompilationFromMainPage(@PathVariable(name = "compId") Long compilationId) {
         log.info("Получен запрос на удаление подборки с id {} c главной страницы", compilationId);
         compilationService.deleteCompilationFromMainPage(compilationId);

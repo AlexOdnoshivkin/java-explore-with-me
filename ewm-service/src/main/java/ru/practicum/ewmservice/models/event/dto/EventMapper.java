@@ -45,6 +45,9 @@ public interface EventMapper {
     })
     Event toEventFromNewEventDto(NewEventDto newEventDto);
 
+    @Mappings({})
+    EventShortDto toEventShortDtoFromEventFullDto(EventFullDto eventFullDto);
+
     default EventShortDto toEventShortDtoFromEvent(Event event) {
         EventShortDto eventShortDto = new EventShortDto();
         eventShortDto.setAnnotation(event.getAnnotation());

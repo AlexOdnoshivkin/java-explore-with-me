@@ -43,7 +43,7 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
             throw new IllegalStateException("Ининциатор не может ооставить заявку на участие в своём событии");
         }
         if (event.getConfirmedRequests() >= event.getParticipantLimit()) {
-            throw new IllegalStateException("Превыен лимит заявок на участие в событии");
+            throw new IllegalStateException("Превышен лимит заявок на участие в событии");
         }
         if (participationRequestRepository.findByEventAndRequester(eventId, userId).isPresent()) {
             throw new IllegalStateException("Запрос уже существует");
@@ -81,7 +81,6 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
     public List<ParticipationRequestDto> getUserEventParticipationRequests(Long userId, Long eventId) {
         userService.checkUserInDatabase(userId);
         eventService.checkEventInDatabase(eventId);
-        eventService.cancelEventFromUser(userId, eventId);
         List<ParticipationRequestDto> result = participationRequestRepository.findAllRequestsByEvent(eventId)
                 .stream()
                 .map(requestMapper::toParticipationRequestDtoFromParticipationRequest)

@@ -30,6 +30,10 @@ public class LocationServiceImpl implements LocationService {
     @Override
     @Transactional
     public LocationDto addLocation(LocationDto locationDto) {
+        if (getLocationByCoordinate(locationDto.getLat(), locationDto.getLon()).isPresent()) {
+            throw new IllegalStateException("По координатам " + locationDto.getLat() + ", " + locationDto.getLon() +
+                    " в базе данных уже есть запись локации");
+        }
         Location location = LocationMapper.toLocationFromLocationDto(locationDto);
         LocationDto result = LocationMapper.toLocationDtoFromLocation(locationRepository.save(location));
         log.debug("Локация сохранена в базе данных: {}", location);
@@ -50,7 +54,7 @@ public class LocationServiceImpl implements LocationService {
     @Transactional
     public void deleteLocationById(Long id) {
         Location location = checkLocation(id);
-        List<Event> events =  eventRepository.getEventsByLocation(location.getLat(), location.getLon());
+        List<Event> events = eventRepository.getEventsByLocation(location.getLat(), location.getLon());
         log.debug("Найденные события в локации: {}", events);
         if (events.size() != 0) {
             throw new IllegalStateException("Локация не может быть удалена, пока к ней привязаны события");
@@ -64,9 +68,9 @@ public class LocationServiceImpl implements LocationService {
                 .findLocationByCoordinate(lat, lon);
     }
 
-    public void compareLocation(Location location) {
-        Location savedLocation = checkLocation(location.getId());
-        if (savedLocation.equals(location)) {
+    public void compareLocation(LocationDto locationDto) {
+        Location savedLocation = checkLocation(locationDto.getId());
+        if (savedLocation.equals(LocationMapper.toLocationFromLocationDto(locationDto))) {
             throw new IllegalStateException("Невереные параметры локации");
         }
     }

@@ -14,6 +14,9 @@ public class AfterTimeValidator implements ConstraintValidator<AfterTime, LocalD
 
     @Override
     public boolean isValid(LocalDateTime value, ConstraintValidatorContext context) {
+        if (value == null) {
+            return true;
+        }
         return LocalDateTime.now().plusHours(2).isBefore(value);
     }
 

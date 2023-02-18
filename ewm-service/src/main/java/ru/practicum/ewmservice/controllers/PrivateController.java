@@ -109,7 +109,7 @@ public class PrivateController {
     @GetMapping("/users/{userId}/events/{eventId}/requests")
     public List<ParticipationRequestDto> getRequestsByUserEvent(@PathVariable(name = "userId") Long userId,
                                                                 @PathVariable(name = "eventId") Long eventId) {
-        log.info("Получен запрос на получение заявок на участие в событии с id: {} пользовател с id: {}",
+        log.info("Получен запрос на получение заявок на участие в событии с id: {} пользователя с id: {}",
                 eventId, userId);
         return requestService.getUserEventParticipationRequests(userId, eventId);
     }

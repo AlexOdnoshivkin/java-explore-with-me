@@ -69,7 +69,7 @@ public class EventServiceImpl implements EventService {
                 newEventDto.setLocation(locationService.addLocation(newEventDto.getLocation()));
             }
         } else {
-            locationService.compareLocation(LocationMapper.toLocationFromLocationDto(locationDto));
+            locationService.compareLocation(locationDto);
         }
 
         Event event = mapper.toEventFromNewEventDto(newEventDto);
@@ -255,6 +255,12 @@ public class EventServiceImpl implements EventService {
     @Transactional
     public EventFullDto putEventByAdmin(Long eventId, AdminUpdateEventRequest adminUpdateEventRequest) {
         Event savedEvent = checkEventInDatabase(eventId);
+        if (adminUpdateEventRequest.getLocation().getId() != null) {
+            locationService.checkLocation(adminUpdateEventRequest.getLocation().getId());
+        }
+        if (adminUpdateEventRequest.getCategory() != null) {
+            checkCategoryInDatabase(adminUpdateEventRequest.getCategory());
+        }
         mapper.updateEventFromAdmin(adminUpdateEventRequest, savedEvent);
         EventFullDto result = mapper.toEventFullDtoFromEvent(eventRepository.save(savedEvent));
         log.debug("Событие обновлено администратором: {}", result);
@@ -341,7 +347,7 @@ public class EventServiceImpl implements EventService {
         Optional<Category> categoryOptional = categoryRepository.findById(categoryId);
         if (categoryOptional.isEmpty()) {
             throw new
-                    EntityNotFoundException("Категория с id " + categoryId + " не нйдена в базе данных");
+                    EntityNotFoundException("Категория с id " + categoryId + " не найдена в базе данных");
         }
         return categoryOptional.get();
     }
@@ -350,7 +356,7 @@ public class EventServiceImpl implements EventService {
         Optional<Event> eventOptional = eventRepository.findById(eventId);
         if (eventOptional.isEmpty()) {
             throw new
-                    EntityNotFoundException("Категория с id " + eventId + " не нйдена в базе данных");
+                    EntityNotFoundException("Событие с id " + eventId + " не найдено в базе данных");
         }
         return eventOptional.get();
     }
