@@ -15,6 +15,7 @@ import ru.practicum.ewmservice.models.event.Event;
 import ru.practicum.ewmservice.repositories.CompilationRepository;
 import ru.practicum.ewmservice.repositories.EventRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -35,8 +36,12 @@ public class CompilationServiceImpl implements CompilationService {
     @Transactional
     public CompilationDto addNewCompilation(NewCompilationDto newCompilationDto) {
         Compilation compilation = mapper.toCompilationFromNewCompilationDto(newCompilationDto);
-        List<Event> events = eventRepository.findAllById(newCompilationDto.getEvents());
-        compilation.setEvents(events);
+        if (newCompilationDto.getEvents() == null) {
+            compilation.setEvents(new ArrayList<>());
+        } else {
+            List<Event> events = eventRepository.findAllById(newCompilationDto.getEvents());
+            compilation.setEvents(events);
+        }
         CompilationDto result = mapper.toCompilationDtoFromCompilation(compilationRepository.save(compilation));
         log.debug("Подборка сохранена в базе данных {}", result);
         return result;
@@ -127,7 +132,7 @@ public class CompilationServiceImpl implements CompilationService {
     private Compilation checkCompilationInDatabase(Long compilationId) {
         Optional<Compilation> compilationOptional = compilationRepository.findById(compilationId);
         if (compilationOptional.isEmpty()) {
-            throw new EntityNotFoundException("Подборка с id " + compilationId + "не найдена в базе данных");
+            throw new EntityNotFoundException("Подборка с id " + compilationId + " не найдена в базе данных");
         }
         return compilationOptional.get();
     }

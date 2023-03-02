@@ -1,15 +1,27 @@
 package ru.practicum.ewmservice.models.location;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.*;
 
-import javax.validation.constraints.NotNull;
+import javax.persistence.*;
 
-@Data
+@Entity
+@Table(name = "locations")
+@Getter
+@Setter
+@NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode
+@ToString
 public class Location {
-    @NotNull
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    @Column(name = "name")
+    private String name;
+    @Column(name = "radius", nullable = false)
+    private Double radius;
+    @Column(name = "lat", nullable = false)
     private Double lat;
-    @NotNull
+    @Column(name = "lon", nullable = false)
     private Double lon;
 }

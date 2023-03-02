@@ -84,7 +84,7 @@ public class CategoryServiceImpl implements CategoryService {
     private Category checkCategoryInDatabase(Long categoryId) {
         Optional<Category> categoryOptional = categoryRepository.findById(categoryId);
         if (categoryOptional.isEmpty()) {
-            throw new EntityNotFoundException("Категория с id {} не найдена в базе данных");
+            throw new EntityNotFoundException("Категория с id " + categoryId + " не найдена в базе данных");
         }
         return categoryOptional.get();
     }

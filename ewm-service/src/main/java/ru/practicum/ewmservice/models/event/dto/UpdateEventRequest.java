@@ -3,6 +3,7 @@ package ru.practicum.ewmservice.models.event.dto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.micrometer.core.lang.Nullable;
 import lombok.Data;
+import ru.practicum.ewmservice.validation.AfterTime;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -16,7 +17,8 @@ public class UpdateEventRequest {
     @Size(min = 20, max = 7000, message = "Полное описание должно быть длиной от 20 до 7000 символов")
     private @Nullable String description;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", shape = JsonFormat.Shape.STRING)
-    private LocalDateTime eventDate;
+    @AfterTime
+    private @Nullable LocalDateTime eventDate;
     @NotNull
     private Long eventId;
     private boolean paid;

@@ -31,7 +31,7 @@ public class UserServiceImpl implements UserService {
     public UserDto addNewUser(NewUserRequest newUser) {
         Optional<User> userOptional = userRepository.getUserByName(newUser.getName());
         if (userOptional.isPresent()) {
-            throw new DataConflictException("Пользователь с именем " + newUser.getName() + "уже существует");
+            throw new DataConflictException("Пользователь с именем " + newUser.getName() + " уже существует");
         }
         User user = UserMapper.mapToUserFromNewUserRequest(newUser);
         User savedUser = userRepository.save(user);
@@ -60,7 +60,7 @@ public class UserServiceImpl implements UserService {
     public User checkUserInDatabase(Long userId) {
         Optional<User> userOptional = userRepository.findById(userId);
         if (userOptional.isEmpty()) {
-            throw new EntityNotFoundException("Пользователь с id " + userId + " не нйден в базе данных");
+            throw new EntityNotFoundException("Пользователь с id " + userId + " не найден в базе данных");
         }
         return userOptional.get();
     }

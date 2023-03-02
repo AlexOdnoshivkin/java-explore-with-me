@@ -3,6 +3,7 @@ package ru.practicum.ewmservice.controllers;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -11,9 +12,11 @@ import ru.practicum.ewmservice.models.category.dto.CategoryDto;
 import ru.practicum.ewmservice.models.compilation.dto.CompilationDto;
 import ru.practicum.ewmservice.models.event.dto.EventFullDto;
 import ru.practicum.ewmservice.models.event.dto.EventShortDto;
+import ru.practicum.ewmservice.models.location.dto.LocationDto;
 import ru.practicum.ewmservice.services.CategoryService;
 import ru.practicum.ewmservice.services.CompilationService;
 import ru.practicum.ewmservice.services.EventService;
+import ru.practicum.ewmservice.services.LocationService;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.Positive;
@@ -24,12 +27,15 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @Slf4j
+@Validated
 public class PublicController {
     private final EventService eventService;
 
     private final CategoryService categoryService;
 
     private final CompilationService compilationService;
+
+    private final LocationService locationService;
 
 
     @GetMapping("/events/{id}")
@@ -56,7 +62,9 @@ public class PublicController {
                                             @PositiveOrZero @RequestParam(name = "from", defaultValue = "0")
                                             Integer from,
                                             @Positive @RequestParam(name = "size", defaultValue = "10") Integer size,
-                                            HttpServletRequest request) {
+                                            HttpServletRequest request,
+                                            @PositiveOrZero @RequestParam(name = "lat", required = false) Double lat,
+                                            @PositiveOrZero @RequestParam(name = "lon", required = false) Double lon) {
         String ip = request.getRemoteAddr();
         String uri = request.getRequestURI();
         log.info("client ip: {}", ip);
@@ -65,7 +73,7 @@ public class PublicController {
                         " rangerEnd: {}, onlyAvailable: {}, sort: {}, from: {}, size: {}", text, categories, paid,
                 rangeStart, rangeEnd, isAvailable, sort, from, size);
         return eventService.searchEvents(text, categories, paid, rangeStart, rangeEnd, isAvailable,
-                sort, from, size, ip, uri);
+                sort, from, size, ip, uri, lat, lon);
     }
 
     @GetMapping("/compilations")
@@ -96,5 +104,20 @@ public class PublicController {
     public CategoryDto getCategoryById(@PathVariable(name = "catId") Long categoryId) {
         log.info("Получен запрос на получение информации про категорию с id {}", categoryId);
         return categoryService.getCategory(categoryId);
+    }
+
+    @GetMapping("/locations")
+    public List<LocationDto> getAllLocations(@PositiveOrZero @RequestParam(name = "from", defaultValue = "0")
+                                             Integer from,
+                                             @Positive @RequestParam(name = "size", defaultValue = "10") Integer size) {
+        log.info("Получен запрос на получение списка локаций с параметрами: from: {}, size: {}", from, size);
+        return locationService.getAllLocations(from, size);
+    }
+
+    @GetMapping("/locations/events")
+    public List<EventShortDto> searchEvenInLocation(@PositiveOrZero @RequestParam(name = "lat") double lat,
+                                                    @PositiveOrZero @RequestParam(name = "lon") double lon) {
+        log.info("Получен запрос на поиск события по координатам локации: lat: {}, lon: {}", lat, lon);
+        return eventService.searchEventInLocation(lat, lon);
     }
 }

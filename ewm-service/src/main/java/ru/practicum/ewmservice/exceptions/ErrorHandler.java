@@ -7,13 +7,15 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import javax.validation.ConstraintViolationException;
 import java.time.LocalDateTime;
 import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class ErrorHandler {
 
-    @ExceptionHandler({IllegalStateException.class, MissingServletRequestParameterException.class})
+    @ExceptionHandler({IllegalStateException.class, MissingServletRequestParameterException.class,
+            ConstraintViolationException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiError badRequestResponseHandler(final Exception e) {
         ApiError apiError = new ApiError();
@@ -25,7 +27,7 @@ public class ErrorHandler {
         return apiError;
     }
 
-    @ExceptionHandler({MethodArgumentNotValidException.class})
+    @ExceptionHandler({MethodArgumentNotValidException.class, })
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiError validationExceptionHandler(final MethodArgumentNotValidException e) {
         ApiError apiError = new ApiError();
